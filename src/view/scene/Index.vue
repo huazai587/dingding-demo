@@ -2,7 +2,7 @@
     <el-card>
             <template #header>
                 <div class="card-header" >
-                    <span>场景列表</span>
+                    <span>场景列表123</span>
                 </div>
             </template>
             <div style="margin-bottom: 20px;">
