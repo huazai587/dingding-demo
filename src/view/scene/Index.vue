@@ -2,16 +2,17 @@
     <el-card>
             <template #header>
                 <div class="card-header" >
-                    <span>场景列表123</span>
+                    <span>场景列表</span>
                 </div>
             </template>
             <div style="margin-bottom: 20px;">
                 <el-input style="width:300px; margin-right: 20px;"
                 :suffix-icon="Search"
+                @change="searchScene"
                 v-model="searchForm.name" placeholder="请输入场景名称"
                 >
                 </el-input>
-                <el-button type="primary"  @click="searchUser" icon="Plus">新增场景</el-button>
+                <el-button type="primary"  @click="addScene" icon="Plus">新增场景</el-button>
             </div>
             <div class="box-card">
             <el-card  v-for="item in sceneList" :body-style="{ paddingTop:'0px'}">
@@ -34,22 +35,70 @@
                 </div>
                 <template #footer>
                     <div style="float: right;height: 32px;">
-                        <el-button class="button" type="primary">编辑场景</el-button>
-                        <el-button class="button" type="info">文档管理</el-button>
+                        <el-button class="button" type="primary" @click="addScene">编辑场景</el-button>
+                        <el-button class="button" type="info" @click="goDoc">文档管理</el-button>
                     </div>
                 </template>
             </el-card>
         </div>
     </el-card>
+    <el-dialog v-model="dialogFormVisible" title="新增场景" width="500">
+    <el-form :model="sceneform" :rules="rules"  label-width="auto">
+      <el-form-item label="场景名称" :label-width="formLabelWidth" required>
+        <el-input v-model="sceneform.name" autocomplete="off"  placeholder="请输入场景名称"/>
+      </el-form-item>
+      <el-form-item label="场景排序" :label-width="formLabelWidth" required>
+        <el-input v-model="sceneform.sort" autocomplete="off"  placeholder="请输入场景序号"/>
+      </el-form-item>
+      <el-form-item label="场景图标上传" :label-width="formLabelWidth" required>
+        <Upload></Upload>
+      </el-form-item>
+      <el-form-item label="场景启用" :label-width="formLabelWidth">
+        <el-switch v-model="sceneform.status" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="saveScene">
+          保存
+        </el-button>
+        <el-button @click="cancleScene">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
-<script setup>
+<script lang="ts"  setup>
 import userApi from "../../api/user";
 import { onMounted, reactive, ref } from "vue";
+import Upload from "../../components/Upload.vue";
+
+import type { FormInstance, FormRules } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
+
 import { useRouter } from 'vue-router'
 const router = useRouter();
+const formLabelWidth = '140px'
+const dialogFormVisible = ref(false);
+interface RuleForm {
+  name: string
+  region: string
+  status: boolean
+}
+const sceneform = reactive({
+  name: '',
+  sort: '',
+  status: true
+})
+const rules = reactive<FormRules<RuleForm>>({
+  name: [
+    { required: true, message: 'Please input Activity name', trigger: 'blur' },
+  ]
+})
+const goDoc = () => {
+    router.push('/scene/list/1/doc')
+}
 // Dom 挂载之后
 onMounted(() => {
     // getUserList();
@@ -70,15 +119,17 @@ const getUserList = async () => {
     tableData.value = res.data.data.records;
     total.value = res.data.data.total;
 }
-const handleSizeChange = (size) => {
-    searchForm.size = size;
-    getUserList();
+
+const addScene = () => {
+    dialogFormVisible.value = true
 }
-const handleCurrentChange = (current) => {
-    searchForm.current = current;
-    getUserList();
+const saveScene = () => {
+    dialogFormVisible.value = false
 }
-const searchUser = () => {
+const cancleScene = () => {
+    dialogFormVisible.value = false
+}
+const searchScene = () => {
     searchForm.current = 1;
     getUserList();
 }

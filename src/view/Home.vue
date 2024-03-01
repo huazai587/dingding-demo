@@ -52,14 +52,7 @@
                 <el-container>
                     <el-main>
                         <!-- 面包屑 -->
-                        <el-breadcrumb separator="/">
-                            <el-breadcrumb-item :to="{ path: '/' }">
-                                <el-icon><House /></el-icon>
-                            </el-breadcrumb-item>
-                            <el-breadcrumb-item>
-                                <a href="/">{{ menuName }}</a>
-                            </el-breadcrumb-item>
-                        </el-breadcrumb>
+                        <Breadcrumb></Breadcrumb>
                         <!-- 主要内容 -->
                         <router-view></router-view>
                     </el-main>
@@ -71,6 +64,7 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 import avatar from "../assets/img/avator.png"
+import Breadcrumb from '../components/Breadcrumb.vue';
 import { useRouter } from 'vue-router'
 const router = useRouter();
 let menuList = ref([
