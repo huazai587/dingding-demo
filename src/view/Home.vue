@@ -5,12 +5,12 @@
             <el-header>
                 <el-row>
                     <el-col :span="4">
-                        <p class="system-name">知否课堂后台管理系统</p>
+                        <!-- <p class="system-name">安徽中烟AI问答机器人管理后台</p> -->
                     </el-col>
                     <el-col :offset="12" :span="8" style="min-width: 150px">
                         <el-dropdown style="float: right; margin: 20px 10px">
-                            <span class="el-dropdown-link" style="color: #fff; cursor: pointer">
-                                知否君 &nbsp;&nbsp; <el-icon class="el-icon--right">
+                            <span class="el-dropdown-link" style=" cursor: pointer">
+                                超级管理员 &nbsp;&nbsp; <el-icon class="el-icon--right">
                                     <arrow-down />
                                 </el-icon>
                             </span>
@@ -20,7 +20,7 @@
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
-                        <el-avatar shape="square" :src="avatar" style="margin: 10px; float: right"></el-avatar>
+                        <el-avatar  :src="avatar" style="margin: 10px; float: right"></el-avatar>
                     </el-col>
                 </el-row>
             </el-header>
@@ -35,37 +35,34 @@
                         </el-icon>
                     </div>
                     <el-menu router :default-active="activePath" class="el-menu-vertical-demo" :collapse="isCollapse">
-                        <el-menu-item index="/index" @click="saveActiveNav('/index')">
+                        <el-menu-item index="/scene/list" @click="saveActiveNav('/scene/list')">
                             <el-icon>
-                                <house />
+                                <Monitor />
                             </el-icon>
-                            <span>首页</span>
+                          <span>场景管理</span>
                         </el-menu-item>
-                        <el-sub-menu index="1">
-                            <template #title>
-                                <el-icon>
-                                    <Setting />
-                                </el-icon>
-                                <span>系统设置</span>
-                            </template>
-                            <el-menu-item index="2-1">权限管理</el-menu-item>
-                        </el-sub-menu>
-                        <el-menu-item index="/user/list" @click="saveActiveNav('/user/list')">
+                        <el-menu-item index="/document/list" @click="saveActiveNav('/document/list')">
                             <el-icon>
-                                <user />
+                                <Document />
                             </el-icon>
-                            <span>用户管理</span>
+                            <span>文档管理</span>
                         </el-menu-item>
                     </el-menu>
                 </el-aside>
                 <el-container>
                     <el-main>
                         <!-- 面包屑 -->
-                        <!-- <Breadcrumb /> -->
+                        <el-breadcrumb separator="/">
+                            <el-breadcrumb-item :to="{ path: '/' }">
+                                <el-icon><House /></el-icon>
+                            </el-breadcrumb-item>
+                            <el-breadcrumb-item>
+                                <a href="/">{{ menuName }}</a>
+                            </el-breadcrumb-item>
+                        </el-breadcrumb>
                         <!-- 主要内容 -->
                         <router-view></router-view>
                     </el-main>
-                    <el-footer>Copyright © 2022 知否技术</el-footer>
                 </el-container>
             </el-container>
         </el-container>
@@ -73,19 +70,32 @@
 </template>
 <script setup>
 import { onBeforeMount, ref } from 'vue';
-import avatar from "../assets/img/avator.jpg"
+import avatar from "../assets/img/avator.png"
 import { useRouter } from 'vue-router'
 const router = useRouter();
+let menuList = ref([
+    {
+        path: "/scene/list",
+        name: "场景管理"
+    },
+    {
+        path: "/document/list",
+        name: "文档管理"
+    }
+]);
 // 挂载 DOM 之前
 onBeforeMount(() => {
     activePath.value = sessionStorage.getItem("activePath")
         ? sessionStorage.getItem("activePath")
-        : "/index"
+        : "/index";
+    menuName.value = menuList.value.find((item) => item.path === activePath.value).name;
 })
 let isCollapse = ref(false);
 let activePath = ref("");
+let menuName = ref("");
 // 保存链接的激活状态
 const saveActiveNav = (path) => {
+    menuName.value = menuList.value.find((item) => item.path === path).name;
     sessionStorage.setItem("activePath", path);
     activePath.value = path;
 }
@@ -105,16 +115,24 @@ const logout = () => {
     width: 100%;
     background: #f2f3f5;
 }
-
+.el-breadcrumb{
+    margin-bottom: 20px;
+}
 .el-header {
-    background: #2661ef;
+    background: #fff;
     padding: 0 10px;
     overflow: hidden;
 }
 
 .system-name {
-    color: #fff;
-    font-size: 18px;
+font-size: 18px;
+background: url("../assets/img/logo.png") no-repeat left center;
+  height: 35px;
+  line-height: 35px;
+  padding-left: 45px;
+  color: #000;
+  background-size: 35px 35px;
+  font-weight: bold;
 }
 
 .el-aside {
@@ -127,15 +145,7 @@ const logout = () => {
     min-height: 400px;
 }
 
-.el-footer {
-    color: #cccccc;
-    text-align: center;
-    line-height: 60px;
-}
 
-.el-footer:hover {
-    color: #2661ef;
-}
 
 .toggle-button {
     background-color: #d9e0e7;
@@ -154,14 +164,6 @@ const logout = () => {
 }
 
 .el-menu-item.is-active {
-    color: #fff !important;
-    font-size: 15px;
-    font-weight: bold;
-    background-color: #2661ef !important;
-    border-radius: 2px;
-    height: 50px;
-    line-height: 50px;
-    box-sizing: border-box;
-    margin: 2px 5px 0px 2px;
+    color: #2661ef !important;
 }
 </style>

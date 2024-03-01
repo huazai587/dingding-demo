@@ -26,22 +26,36 @@ const routes = [
                 meta: {
                     title: '首页'
                 },
-                component: () => import('../view/Welcome.vue')
+                component: () => import('../view/Home.vue')
             },
             {
-                path: '/user/list',
+                path: '/scene/list',
                 meta: {
-                    title: '用户管理'
+                    title: '场景管理'
                 },
-                component: () => import('../view/user/Index.vue'),
+                component: () => import('../view/scene/Index.vue'),
             },
             {
-                path: '/user/detail',
+                path: '/scene/detail',
                 meta: {
-                    title: '用户详情'
+                    title: '场景详情'
                 },
-                component: () => import('../view/user/Detail.vue'),
+                component: () => import('../view/scene/Detail.vue'),
             },
+            {
+                path: '/document/list',
+                meta: {
+                    title: '文档管理'
+                },
+                component: () => import('../view/document/Index.vue'),
+            },
+            {
+                path: '/document/detail',
+                meta: {
+                    title: '文档详情'
+                },
+                component: () => import('../view/document/Detail.vue'),
+            }
         ]
     },
 ]
@@ -53,7 +67,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     // 修改页面 title
     if (to.meta.title) {
-      document.title = '知否课堂后台管理系统 - ' + to.meta.title
+      document.title = '安徽中烟AI问答机器人管理后台 - ' + to.meta.title
     }
     // 放行登录页面
     if (to.path === '/login') {

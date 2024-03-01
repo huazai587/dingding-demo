@@ -1,6 +1,10 @@
 <template>
-    <div>
-        <el-card>
+    <el-card>
+            <template #header>
+                <div class="card-header" >
+                    <span>文档管理</span>
+                </div>
+            </template>
             <el-input style="width:440px" @clear="searchUser" clearable v-model="searchForm.name" placeholder="请输入用户姓名" class="input-with-select">
                 <template #append>
                     <el-button icon="Search" @click="searchUser" />
@@ -21,8 +25,7 @@
             <el-pagination style="margin-top:20px" :current-page="searchForm.current" :page-size="searchForm.size"
                 :page-sizes="[10, 20, 30, 40]" layout="->,total, sizes, prev, pager, next, jumper" :total="total"
                 @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-        </el-card>
-    </div>
+    </el-card>
 </template>
 
 <script setup>
@@ -33,7 +36,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter();
 // Dom 挂载之后
 onMounted(() => {
-    getUserList();
+    // getUserList();
 })
 // 用户数据
 let tableData = ref([]);
@@ -90,5 +93,7 @@ const deleteUser = (id) => {
 </script>
 
 <style lang="scss" scoped>
-
+:deep(.el-card__header) {
+    border: none !important;
+  }
 </style>
