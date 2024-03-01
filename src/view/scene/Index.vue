@@ -115,6 +115,7 @@ const deleteUser = (id) => {
   :deep(.el-card__footer) {
     border: none !important;
     padding-top: 0;
+    overflow: hidden;
   }
 .box-card {
   display: flex;

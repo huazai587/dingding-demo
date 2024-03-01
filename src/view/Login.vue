@@ -43,17 +43,18 @@ const onSubmit = () => {
   if (!ruleFormRef) return;
   ruleFormRef.value.validate(async (valid) => {
     if (valid) {
-      const res = await userApi.login(form);
-      if (res.data) {
-        if (res.data.success) {
-          // proxy.$commonJs.changeView('/home');
-          router.push("/home");
-        } else {
-          ElMessage.error(res.data.message);
-        }
-      } else {
-        ElMessage.error("服务器内部错误");
-      }
+      proxy.$commonJs.changeView('/home');
+      // const res = await userApi.login(form);
+      // if (res.data) {
+      //   if (res.data.success) {
+      //     // proxy.$commonJs.changeView('/home');
+      //     router.push("/home");
+      //   } else {
+      //     ElMessage.error(res.data.message);
+      //   }
+      // } else {
+      //   ElMessage.error("服务器内部错误");
+      // }
     } else {
       return false;
     }

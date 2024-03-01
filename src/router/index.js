@@ -19,15 +19,8 @@ const routes = [
             title: '主页'
         },
         component: () => import('../view/Home.vue'),
-        redirect: '/index',
+        redirect: '/scene/list',
         children: [
-            {
-                path: '/index',
-                meta: {
-                    title: '首页'
-                },
-                component: () => import('../view/Home.vue')
-            },
             {
                 path: '/scene/list',
                 meta: {

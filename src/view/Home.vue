@@ -87,11 +87,11 @@ let menuList = ref([
 onBeforeMount(() => {
     activePath.value = sessionStorage.getItem("activePath")
         ? sessionStorage.getItem("activePath")
-        : "/index";
+        : "/scene/list";
     menuName.value = menuList.value.find((item) => item.path === activePath.value).name;
 })
 let isCollapse = ref(false);
-let activePath = ref("");
+let activePath = ref("/scene/list");
 let menuName = ref("");
 // 保存链接的激活状态
 const saveActiveNav = (path) => {
