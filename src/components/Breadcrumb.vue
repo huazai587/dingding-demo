@@ -7,7 +7,6 @@
                 <a href="/">{{ menuName }}</a>
             </el-breadcrumb-item>
         </el-breadcrumb>
-   
 </template>
 
 <script setup>

@@ -29,11 +29,11 @@ const routes = [
                 component: () => import('../view/scene/Index.vue'),
             },
             {
-                path: '/scene/detail',
+                path: '/scene/document',
                 meta: {
-                    title: '场景详情'
+                    title: '文档列表'
                 },
-                component: () => import('../view/scene/Detail.vue'),
+                component: () => import('../view/scene/Doc.vue'),
             },
             {
                 path: '/document/list',
