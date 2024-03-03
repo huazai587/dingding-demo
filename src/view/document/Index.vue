@@ -65,18 +65,23 @@
             </div>
             <!-- 按钮 -->
             <div class="btn-wrap">
-                <el-button type="primary" :icon="Plus">上传</el-button>
+                <el-button type="primary" :icon="Plus" @click="downloadDoc">上传</el-button>
                 <el-button type="primary" :icon="Plus">批量上传</el-button>
                 <el-button type="danger" :icon="Delete">批量删除</el-button>
             </div>
-            <el-table :data="tableData" border style="width: 100%;margin-top:20px">
-                <el-table-column prop="name" label="姓名" width="180" />
-                <el-table-column prop="age" label="年龄" width="180" />
-                <el-table-column label="操作" width="330">
+            <el-table :data="tableData" border style="width: 100%;margin-top:20px"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" />
+                <el-table-column prop="number" label="文档编号" width="100" />
+                <el-table-column prop="name" label="文档名称" width="260" />
+                <el-table-column prop="scene" label="所属场景" width="300" />
+                <el-table-column prop="type" label="文件类型" width="150" />
+                <el-table-column prop="date" label="创建时间" width="200" />
+                <el-table-column label="操作">
                     <template #default="scope">
-                        <el-button type="danger" size="small" @click="deleteUser(scope.row.id)">删除</el-button>
-                        <el-button size="small"
-                            @click="() => router.push({ path: '/user/detail', query: { id: scope.row.id } })">详情</el-button>
+                        <el-link type="primary" @click="downloadDoc" :underline="false">下载</el-link>
+                        <el-link type="primary" @click="editDoc" :underline="false">编辑</el-link>
+                        <el-link type="danger" @click="deleteDoc" :underline="false">删除</el-link>
                     </template>
                 </el-table-column>
             </el-table>
@@ -85,13 +90,62 @@
                 :page-sizes="[10, 20, 30, 40]" layout="->,total, sizes, prev, pager, next, jumper" :total="total"
                 @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </el-card>
+        <!-- 新增编辑文档 -->
+        <el-dialog v-model="dialogFormVisible" title="新增文档" width="500">
+        <el-form :model="sceneform" :rules="rules" label-width="auto">
+            <el-form-item label="文档名称" :label-width="formLabelWidth" required>
+                <el-input v-model="sceneform.name" autocomplete="off" placeholder="请输入场景名称" />
+            </el-form-item>
+            <el-form-item label="文档编号" :label-width="formLabelWidth" required>
+                <el-input v-model="sceneform.sort" autocomplete="off" placeholder="请输入场景序号" />
+            </el-form-item>
+            <el-form-item label="所属场景" :label-width="formLabelWidth" required>
+                <!-- <el-input v-model="sceneform.scene" autocomplete="off" placeholder="请输入所属场景" /> -->
+                <el-select
+                    v-model="sceneform.scene"
+                    multiple
+                    placeholder="选择所属场景"
+                    >
+                    <el-option
+                        v-for="item in uploadSceneList"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value"
+                    />
+                    </el-select>
+            </el-form-item>
+            <el-form-item label="文档上传" :label-width="formLabelWidth" required>
+                <!-- 上传 -->
+    <el-upload v-model:file-list="fileList" class="upload-demo"
+        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" :on-change="handleChange">
+        <el-button type="primary">点击上传</el-button>
+
+        <template #tip>
+            <div class="el-upload__tip">
+                jpg/png files with a size less than 500kb
+            </div>
+        </template>
+    </el-upload>
+            </el-form-item>
+        </el-form>
+
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button type="primary" @click="saveDoc">
+                    保存
+                </el-button>
+                <el-button @click="cancleDoc">关闭</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import userApi from "../../api/user";
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, RefreshLeft, Plus, Delete} from '@element-plus/icons-vue'
+import { Search, RefreshLeft, Plus, Delete} from '@element-plus/icons-vue';
+import type { UploadProps, UploadUserFile } from 'element-plus';
 import { useRouter } from 'vue-router'
 const router = useRouter();
 // Dom 挂载之后
@@ -99,7 +153,7 @@ onMounted(() => {
     // getUserList();
 })
 // 所属场景
-const sceneList = [
+const sceneList = ref([
   {
     name: '全部',
     value: '全部',
@@ -115,9 +169,9 @@ const sceneList = [
   },{
     name: '综合行政',
     value: '综合行政',
-  }]
-// 所属场景
-const docTypeList = [
+  }])
+// 文件类型
+const docTypeList = ref([
   {
     name: '全部',
     value: '全部',
@@ -133,10 +187,67 @@ const docTypeList = [
   },{
     name: 'excel',
     value: 'excel',
-  }]
+  }])
 
 // 用户数据
-let tableData = ref([]);
+let tableData = ref([
+    {
+        number: 1,
+        name: '每日推荐视频集',
+        scene:'未分配',
+        type: 'pdf',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+    {
+        number: 2,
+        name: '每日推荐视频集',
+        scene:'物流、营销',
+        type: 'world',
+        date: '2021-05-03',
+    },
+]);
 let total = ref(0);
 // 搜索条件
 const searchForm = reactive({
@@ -155,22 +266,88 @@ const getUserList = async () => {
     tableData.value = res.data.data.records;
     total.value = res.data.data.total;
 }
-const handleSizeChange = (size) => {
-    searchForm.size = size;
-    getUserList();
+
+// 弹窗
+// 上传所属场景
+const uploadSceneList = ref([
+  {
+    name: '物流',
+    value: '物流',
+  },{
+    name: '营销',
+    value: '营销',
+  },{
+    name: '采购',
+    value: '采购',
+  },{
+    name: '综合行政',
+    value: '综合行政',
+  }])
+
+const formLabelWidth = '140px'
+const dialogFormVisible = ref(false);
+const fileList = ref<UploadUserFile[]>([
+  {
+    name: 'food.jpeg',
+    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
+  },
+  {
+    name: 'food2.jpeg',
+    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
+  },
+])
+
+const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
+  fileList.value = fileList.value.slice(-3)
 }
-const handleCurrentChange = (current) => {
-    searchForm.current = current;
-    getUserList();
+
+let docName = ref('')
+
+interface RuleForm {
+    name: string
+    region: string
+    status: boolean
 }
-const searchUser = () => {
-    searchForm.current = 1;
-    getUserList();
+const sceneform = reactive({
+    name: '',
+    sort: '',
+    status: true
+})
+const rules = reactive<FormRules<RuleForm>>({
+    name: [
+        { required: true, message: 'Please input Activity name', trigger: 'blur' },
+    ]
+})
+
+const downloadDoc = () => {
+    dialogFormVisible.value = true
 }
-// 删除用户
-const deleteUser = (id) => {
+const saveDoc = () => {
+    dialogFormVisible.value = false
+}
+const cancleDoc = () => {
+    dialogFormVisible.value = false
+}
+const editDoc = () => {
+    dialogFormVisible.value = true
+}
+
+const handleSelectionChange = (val) => {
+    multipleSelection.value = val
+}
+const handleSizeChange = (val) => {
+}
+const handleCurrentChange = (val) => {
+
+}
+
+
+
+// 删除文档
+const deleteDoc = (id) => {
     ElMessageBox.confirm(
-        '确定要删除该用户信息吗?',
+        '您即将删除该文档，请确认后操作。',
+        '删除文档',
         {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
@@ -191,6 +368,7 @@ const deleteUser = (id) => {
         })
     })
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -226,5 +404,10 @@ const deleteUser = (id) => {
 
 .btn-wrap{
     width: 100%;
+}
+.cell {
+    .el-link {
+        margin-right: 10px;
+    }
 }
 </style>
