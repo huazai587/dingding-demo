@@ -1,4 +1,6 @@
 <template>
+     <!-- 面包屑 -->
+  <Breadcrumb></Breadcrumb>
     <el-card>
         <template #header>
             <div class="card-header">
@@ -72,6 +74,7 @@
 
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from "vue";
+import Breadcrumb from '../../components/Breadcrumb.vue';
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, RefreshLeft, Plus, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';

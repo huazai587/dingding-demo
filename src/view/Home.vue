@@ -4,10 +4,10 @@
             <!-- header -->
             <el-header>
                 <el-row>
-                    <el-col :span="4">
-                        <!-- <p class="system-name">安徽中烟AI问答机器人管理后台</p> -->
+                    <el-col :span="7">
+                        <p class="system-name">安徽中烟AI问答机器人管理后台</p>
                     </el-col>
-                    <el-col :offset="12" :span="8" style="min-width: 150px">
+                    <el-col :offset="12" :span="5" style="min-width: 150px">
                         <el-dropdown style="float: right; margin: 20px 10px">
                             <span class="el-dropdown-link" style=" cursor: pointer">
                                 超级管理员 &nbsp;&nbsp; <el-icon class="el-icon--right">
@@ -20,7 +20,7 @@
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown>
-                        <el-avatar  :src="avatar" style="margin: 10px; float: right"></el-avatar>
+                        <el-avatar  :src="avatar" style="margin: 10px; float: right; width: 32px;height: 32px;"></el-avatar>
                     </el-col>
                 </el-row>
             </el-header>
@@ -35,13 +35,13 @@
                         </el-icon>
                     </div>
                     <el-menu router :default-active="activePath" class="el-menu-vertical-demo" :collapse="isCollapse">
-                        <el-menu-item index="/scene/list" @click="saveActiveNav('/scene/list')">
+                        <el-menu-item index="/scene" @click="saveActiveNav('/scene')">
                             <el-icon>
                                 <Monitor />
                             </el-icon>
                           <span>场景管理</span>
                         </el-menu-item>
-                        <el-menu-item index="/document/list" @click="saveActiveNav('/document/list')">
+                        <el-menu-item index="/document-manager" @click="saveActiveNav('/document-manager')">
                             <el-icon>
                                 <Document />
                             </el-icon>
@@ -51,8 +51,6 @@
                 </el-aside>
                 <el-container>
                     <el-main>
-                        <!-- 面包屑 -->
-                        <Breadcrumb></Breadcrumb>
                         <!-- 主要内容 -->
                         <router-view></router-view>
                     </el-main>
@@ -64,32 +62,20 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 import avatar from "../assets/img/avator.png"
-import Breadcrumb from '../components/Breadcrumb.vue';
 import { useRouter } from 'vue-router'
 const router = useRouter();
-let menuList = ref([
-    {
-        path: "/scene/list",
-        name: "场景管理"
-    },
-    {
-        path: "/document/list",
-        name: "文档管理"
-    }
-]);
+
 // 挂载 DOM 之前
 onBeforeMount(() => {
     activePath.value = sessionStorage.getItem("activePath")
         ? sessionStorage.getItem("activePath")
-        : "/scene/list";
-    menuName.value = menuList.value.find((item) => item.path === activePath.value).name;
+        : "/scene";
 })
 let isCollapse = ref(false);
-let activePath = ref("/scene/list");
-let menuName = ref("");
+let activePath = ref("/scene");
+
 // 保存链接的激活状态
 const saveActiveNav = (path) => {
-    menuName.value = menuList.value.find((item) => item.path === path).name;
     sessionStorage.setItem("activePath", path);
     activePath.value = path;
 }
@@ -114,18 +100,21 @@ const logout = () => {
 }
 .el-header {
     background: #fff;
-    padding: 0 10px;
+    padding: 0 16px;
     overflow: hidden;
 }
 
 .system-name {
-font-size: 18px;
+    padding: 0;
+    margin: 0;
+    margin-top: 14px;
+font-size: 20px;
 background: url("../assets/img/logo.png") no-repeat left center;
   height: 35px;
   line-height: 35px;
   padding-left: 45px;
   color: #000;
-  background-size: 35px 35px;
+  background-size: 32px;
   font-weight: bold;
 }
 

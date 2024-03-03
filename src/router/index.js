@@ -6,7 +6,7 @@ const routes = [
     },
     {
         path: '/login',
-        name: 'login',
+        name: '登录',
         meta: {
             title: '登录'
         },
@@ -19,35 +19,32 @@ const routes = [
             title: '主页'
         },
         component: () => import('../view/Home.vue'),
-        redirect: '/scene/list',
+        redirect: '/scene',
         children: [
             {
-                path: '/scene/list',
+                path: '/scene',
+                name: '场景管理',
                 meta: {
                     title: '场景管理'
                 },
                 component: () => import('../view/scene/Index.vue'),
             },
             {
-                path: '/scene/document',
+                path: '/scene/document-list',
+                name: '文档列表',
                 meta: {
                     title: '文档列表'
                 },
-                component: () => import('../view/scene/Doc.vue'),
+                component: () => import('../view/scene/Doc.vue')
+
             },
             {
-                path: '/document/list',
+                path: '/document-manager',
+                name: '文档管理',
                 meta: {
                     title: '文档管理'
                 },
                 component: () => import('../view/document/Index.vue'),
-            },
-            {
-                path: '/document/detail',
-                meta: {
-                    title: '文档详情'
-                },
-                component: () => import('../view/document/Detail.vue'),
             }
         ]
     },

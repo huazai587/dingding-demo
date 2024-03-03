@@ -1,4 +1,6 @@
 <template>
+ <!-- 面包屑 -->
+  <Breadcrumb></Breadcrumb>
   <el-card>
     <template #header>
       <div class="card-header">
@@ -16,11 +18,16 @@
         <template #header>
           <div class="card-header">
             <span class="card-title">
-              <el-icon>
-                <User />
-              </el-icon>
-              <span>{{ '物流' }}</span>
-              <el-tag type="success">已开启</el-tag>
+              <img src="../../assets/img/avator.png" alt="" srcset="" width="16" height="16">
+              <span >{{ '物流' }}</span>
+              <!-- <el-tag type="success">
+                <el-icon><CircleCheck /></el-icon>
+                已开启
+              </el-tag> -->
+              <el-tag type="info">
+                <el-icon><VideoPause /></el-icon>
+                已停用
+              </el-tag>
             </span>
             <el-icon style="cursor: pointer;">
               <Delete  @click="deleteScene"/>
@@ -73,7 +80,7 @@
 import userApi from "../../api/user";
 import { onMounted, reactive, ref } from "vue";
 import Upload from "../../components/Upload.vue";
-
+import Breadcrumb from '../../components/Breadcrumb.vue';
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -98,7 +105,7 @@ const rules = reactive<FormRules<RuleForm>>({
   ]
 })
 const goDoc = () => {
-  router.push('/scene/document')
+  router.push('/scene/document-list')
 }
 // Dom 挂载之后
 onMounted(() => {
@@ -176,16 +183,15 @@ const searchScene = () => {
   display: flex;
   justify-content: space-between;
   flex-wrap: nowrap;
-
   :deep(.el-card__header) {
     padding-bottom: 0px;
     overflow: hidden;
   }
-
   flex-grow: 1;
   flex-basis: 0;
-  margin-right: 20px;
-
+  .el-card{
+    width: 24%;
+  }
   &:last-child {
     margin-right: 0;
   }
@@ -201,12 +207,21 @@ const searchScene = () => {
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
+      span{
+        font-size: 14px;
+      }
+      .el-tag{
+        font-size: 12px;
+        .el-icon{
+          vertical-align: -1px;
+        }
+      }
     }
   }
 
   .card-item {
     font-size: 12px;
-    color: gray;
+    color: #86909C;
   }
 }
 </style>

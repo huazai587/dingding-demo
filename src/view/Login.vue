@@ -101,6 +101,7 @@ button {
   border-radius: 6px;
   margin: 40px auto;
   padding-top: 50px;
+  margin-top: 100px;
 }
 
 .el-form {
