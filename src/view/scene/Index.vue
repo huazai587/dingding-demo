@@ -58,7 +58,7 @@
         <el-input v-model="sceneform.sort" autocomplete="off" placeholder="请输入场景序号" />
       </el-form-item>
       <el-form-item label="场景图标上传" :label-width="formLabelWidth" required>
-        <Upload></Upload>
+        <UploadIcon></UploadIcon>
       </el-form-item>
       <el-form-item label="场景启用" :label-width="formLabelWidth">
         <el-switch v-model="sceneform.status" />
@@ -79,7 +79,7 @@
 <script lang="ts" setup>
 import userApi from "../../api/user";
 import { onMounted, reactive, ref } from "vue";
-import Upload from "../../components/Upload.vue";
+import UploadIcon from "../../components/UploadIcon.vue";
 import Breadcrumb from '../../components/Breadcrumb.vue';
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
@@ -105,7 +105,7 @@ const rules = reactive<FormRules<RuleForm>>({
   ]
 })
 const goDoc = () => {
-  router.push('/scene/document-list')
+  router.push('/document-list/1')
 }
 // Dom 挂载之后
 onMounted(() => {
