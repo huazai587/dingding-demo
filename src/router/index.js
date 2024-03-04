@@ -16,7 +16,7 @@ const routes = [
     path: "/home",
     name: "主页",
     meta: {
-      breadcrumb:[{name:"主页",path:"/home"}]
+      title:'主页'
     },
     component: () => import("../view/Home.vue"),
     redirect: "/scene",
@@ -25,29 +25,27 @@ const routes = [
         path: "/scene",
         name: "场景管理",
         meta: {
-            breadcrumb:[{name:"主页",path:"/home"},{name:"场景管理",path:"/scene"}]
+          title:'场景管理',
+          showFather: true
         },
-        component: () => import("../view/scene/Index.vue")
-      },
-      {
-            path: "/document-list/:id",
+        component: () => import("../view/scene/Index.vue"),
+        children: [
+          {
+            path: "/scene/document-list/:id",
             name: "文档列表",
             meta: {
-                breadcrumb:[
-                    {name:"主页",path:"/home"},
-                    {name:"场景管理",path:"/scene"},
-                    {name:"文档列表",path:"/scene/document-list"}]
+                title:'文档列表',
+                showFather: false
             },
-            component: () => import("../view/scene/Doc.vue"),
-          },
+            component: () => import("../view/scene/Doc.vue")
+          }
+        ]
+      },
       {
         path: "/document-manager",
         name: "文档管理",
         meta: {
-            breadcrumb:[
-                {name:"主页",path:"/home"},
-                {name:"文档管理",path:"/document-manager"}
-            ]
+          title:'文档管理'
         },
         component: () => import("../view/document/Index.vue"),
       },

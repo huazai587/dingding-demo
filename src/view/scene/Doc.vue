@@ -1,6 +1,4 @@
 <template>
-     <!-- 面包屑 -->
-  <Breadcrumb></Breadcrumb>
     <el-card>
         <template #header>
             <div class="card-header">

@@ -5,7 +5,7 @@
             <el-header>
                 <el-row>
                     <el-col :span="7">
-                        <p class="system-name">安徽中烟AI问答机器人管理后台</p>
+                        <!-- <p class="system-name">安徽中烟AI问答机器人管理后台</p> -->
                     </el-col>
                     <el-col :offset="12" :span="5" style="min-width: 150px">
                         <el-dropdown style="float: right; margin: 20px 10px">
@@ -52,7 +52,7 @@
                 <el-container>
                     <el-main>
                         <!-- 主要内容 -->
-                        <router-view></router-view>
+                        <router-view ></router-view>
                     </el-main>
                 </el-container>
             </el-container>
@@ -60,11 +60,11 @@
     </div>
 </template>
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import avatar from "../assets/img/avator.png"
-import { useRouter } from 'vue-router'
+import { useRouter ,useRoute} from 'vue-router'
 const router = useRouter();
-
+const route = useRoute();
 // 挂载 DOM 之前
 onBeforeMount(() => {
     activePath.value = sessionStorage.getItem("activePath")
@@ -84,6 +84,11 @@ const logout = () => {
     sessionStorage.clear();
     router.push("/login");
 }
+
+// 监听缓存激活路径的变化
+watch(() =>route.path,(newVal,oldVal)=>{
+      activePath.value = newVal;
+})
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 <template>
  <!-- 面包屑 -->
   <Breadcrumb></Breadcrumb>
-  <el-card>
+  <el-card v-show="route.meta.showFather">
     <template #header>
       <div class="card-header">
         <span>场景列表</span>
@@ -49,6 +49,8 @@
       </el-card>
     </div>
   </el-card>
+
+  <router-view ></router-view>
   <el-dialog v-model="dialogFormVisible" title="新增场景" width="500">
     <el-form :model="sceneform" :rules="rules" label-width="auto">
       <el-form-item label="场景名称" :label-width="formLabelWidth" required>
@@ -74,6 +76,7 @@
       </div>
     </template>
   </el-dialog>
+  
 </template>
 
 <script lang="ts" setup>
@@ -85,8 +88,9 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 const router = useRouter();
+const route = useRoute();
 const formLabelWidth = '140px'
 const dialogFormVisible = ref(false);
 interface RuleForm {
@@ -105,7 +109,7 @@ const rules = reactive<FormRules<RuleForm>>({
   ]
 })
 const goDoc = () => {
-  router.push('/document-list/1')
+  router.push('/scene/document-list/1')
 }
 // Dom 挂载之后
 onMounted(() => {
