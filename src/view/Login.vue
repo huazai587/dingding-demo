@@ -4,7 +4,7 @@
       <el-main>
         <el-card class="login_card">
           <div class="login_title">
-            欢迎登录安徽中烟AI问答机器人管理后台
+            <!-- 欢迎登录安徽中烟AI问答机器人管理后台 -->
           </div>
           <el-form :model="form" :rules="rules" ref="ruleFormRef" label-width="80px">
             <el-form-item label="" prop="username">

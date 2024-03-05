@@ -1,6 +1,6 @@
 <template>
  <!-- 面包屑 -->
-  <Breadcrumb></Breadcrumb>
+  <BreadcrumbDing></BreadcrumbDing>
   <el-card v-show="route.meta.showFather">
     <template #header>
       <div class="card-header">
@@ -83,9 +83,9 @@
 import userApi from "../../api/user";
 import { onMounted, reactive, ref } from "vue";
 import UploadIcon from "../../components/UploadIcon.vue";
-import Breadcrumb from '../../components/Breadcrumb.vue';
+import BreadcrumbDing from '../../components/BreadcrumbDing.vue';
 import type { FormInstance, FormRules } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+ import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 import { useRouter, useRoute } from 'vue-router'
@@ -108,7 +108,9 @@ const rules = reactive<FormRules<RuleForm>>({
     { required: true, message: 'Please input Activity name', trigger: 'blur' },
   ]
 })
+// 跳转文档管理
 const goDoc = () => {
+  sessionStorage.setItem("activePath", '/scene');
   router.push('/scene/document-list/1')
 }
 // Dom 挂载之后
@@ -152,7 +154,7 @@ const deleteScene = ()=>{
 const getUserList = async () => {
   const res = await userApi.getUserList(searchForm);
   console.log(res);
-  tableData.value = res.data.data.records;
+  sceneList.value = res.data.data.records;
   total.value = res.data.data.total;
 }
 

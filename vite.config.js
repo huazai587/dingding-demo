@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     open: false,
+    hmr: true,
     port: 3000,
     proxy: {
       '/api': {

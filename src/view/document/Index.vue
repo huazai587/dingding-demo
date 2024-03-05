@@ -1,6 +1,6 @@
 <template>
      <!-- 面包屑 -->
-    <Breadcrumb></Breadcrumb>
+    <BreadcrumbDing></BreadcrumbDing>
     <el-card>
         <template #header>
             <div class="card-header" >
@@ -142,7 +142,7 @@
 
 <script lang="ts" setup>
 import userApi from "../../api/user";
-import Breadcrumb from '../../components/Breadcrumb.vue';
+import BreadcrumbDing from '../../components/BreadcrumbDing.vue';
 import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, RefreshLeft, Plus, Delete} from '@element-plus/icons-vue';
