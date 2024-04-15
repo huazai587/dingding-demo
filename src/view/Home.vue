@@ -5,7 +5,7 @@
             <el-header>
                 <el-row>
                     <el-col :span="7">
-                        <!-- <p class="system-name">安徽中烟AI问答机器人管理后台</p> -->
+                        <p class="system-name">安徽中烟AI问答机器人管理后台</p>
                     </el-col>
                     <el-col :offset="12" :span="5" style="min-width: 150px">
                         <el-dropdown style="float: right; margin: 20px 10px">

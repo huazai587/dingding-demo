@@ -5,9 +5,8 @@
                 <el-icon @click="goHome()"><House /></el-icon>
             </el-breadcrumb-item>
             <el-breadcrumb-item v-for="item in tabs" :to="item.path">
-            {{item.meta.title}}
+              {{item.meta.title}}
             </el-breadcrumb-item>
-
         </el-breadcrumb>
     </div>
 </template>
@@ -33,7 +32,7 @@ watch(() =>route.matched,(newVal,oldVal)=>{
       tabs.value = matched;//更新路由菜单数组
 })
 const goHome = ()=>{
-        sessionStorage.setItem("activePath", '/scene');
+    sessionStorage.setItem("activePath", '/scene');
 }
 
 

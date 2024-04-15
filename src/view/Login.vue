@@ -4,17 +4,17 @@
       <el-main>
         <el-card class="login_card">
           <div class="login_title">
-            <!-- 欢迎登录安徽中烟AI问答机器人管理后台 -->
+            欢迎登录安徽中烟AI问答机器人管理后台
           </div>
           <el-form :model="form" :rules="rules" ref="ruleFormRef" label-width="80px">
             <el-form-item label="" prop="username">
               <el-input v-model="form.username" placeholder="请输入登录用户名" :prefix-icon="Avatar" size="large" />
             </el-form-item>
             <el-form-item label="" prop="password">
-              <el-input type="password" placeholder="请输入登录密码" v-model="form.password" :prefix-icon="Lock" size="large" />
+              <el-input type="password" placeholder="请输入登录密码" v-model="form.password" :prefix-icon="Lock" size="large" show-password />
             </el-form-item>
             <el-form-item style="margin-top: 40px">
-              <el-button type="primary" @click="onSubmit()" size="large">登录</el-button>
+              <el-button type="primary" @click="onSubmit()" size="large" @keyup.enter="onSubmit()">登录</el-button>
             </el-form-item>
           </el-form>
         </el-card>
@@ -43,18 +43,19 @@ const onSubmit = () => {
   if (!ruleFormRef) return;
   ruleFormRef.value.validate(async (valid) => {
     if (valid) {
-      proxy.$commonJs.changeView('/home');
-      // const res = await userApi.login(form);
-      // if (res.data) {
-      //   if (res.data.success) {
-      //     // proxy.$commonJs.changeView('/home');
-      //     router.push("/home");
-      //   } else {
-      //     ElMessage.error(res.data.message);
-      //   }
-      // } else {
-      //   ElMessage.error("服务器内部错误");
-      // }
+      const res = await userApi.login(form);
+      if (res.data) {
+        if (res.data.accessToken) {
+          let Data = Object.assign({ name: 'token', val: res.data.accessToken }, { startTime: new Date().getTime() },{ endTime: res.data.expiresTime });
+          localStorage.setItem("token", JSON.stringify(Data));
+          // proxy.$commonJs.changeView('/home');
+          router.push("/home");
+        } else {
+          ElMessage.error(res.data.msg);
+        }
+      } else {
+        ElMessage.error(res.msg);
+      }
     } else {
       return false;
     }

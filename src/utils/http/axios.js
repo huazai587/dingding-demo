@@ -1,18 +1,25 @@
 import axios from "axios";
 import { ElMessage } from 'element-plus'
+
 // 1. 创建axios实例
 const instance = axios.create({
   // 接口
-  baseURL: "/api",
+  baseURL: "/admin-api",
   // 超时时间
   timeout: 50000,
 });
 // 2.请求拦截
 instance.interceptors.request.use(
   config => {
-    let token = sessionStorage.getItem('token')
+    let K = localStorage.getItem("token");
+    try {
+      K = JSON.parse(K);
+    } catch (err) {}
+    if(K){
+    let token = K.val
     if (token) {
-      config.headers['token'] = token
+      config.headers['Authorization'] = 'Bearer ' + token
+    }
     }
     return config;
   },
@@ -25,6 +32,10 @@ instance.interceptors.request.use(
 // 3.响应拦截
 instance.interceptors.response.use(
   res => {
+    if(res.data.code === 401){
+      ElMessage.error("token过期，请重新登录");
+      window.location.href = '/login'
+    }
     return res;
   },
   error => {

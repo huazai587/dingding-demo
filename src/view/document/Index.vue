@@ -26,9 +26,9 @@
                             <el-select v-model="searchForm.scene" placeholder="请选择">
                             <el-option
                                 v-for="item in sceneList"
-                                :key="item.index"
-                                :label="item.name"
-                                :value="item.value"
+                                :key="item.conditionsId"
+                                :label="item.conditionsName"
+                                :value="item.conditionsId"
                             />
                             </el-select>
                         </el-form-item>
@@ -38,9 +38,8 @@
                             <el-select v-model="searchForm.docType" placeholder="请选择">
                             <el-option
                                 v-for="item in docTypeList"
-                                :key="item.index"
-                                :label="item.name"
-                                :value="item.value"
+                                :label="item"
+                                :value="item"
                             />
                             </el-select>
                         </el-form-item>
@@ -53,6 +52,7 @@
                                 range-separator="至"
                                 start-placeholder="开始日期"
                                 end-placeholder="结束日期"
+                                value-format="YYYY-MM-DD"
                                 :size="size"
                             />
                         </el-form-item>
@@ -69,37 +69,37 @@
         <div class="btn-wrap">
             <el-button type="primary" :icon="Plus" @click="uploadDoc">上传</el-button>
             <el-button type="primary" @click="uploadBulkDoc" :icon="Plus">批量上传</el-button>
-            <el-button type="danger" :icon="Delete">批量删除</el-button>
+            <el-button type="danger" @click="multiDeleteDoc" >批量删除</el-button>
         </div>
         <el-table :data="tableData" border style="width: 100%;margin-top:20px"
-            @selection-change="handleSelectionChange">
+            @selection-change="handleSelectionChange" v-loading="loading">
             <el-table-column type="selection" width="55" />
-            <el-table-column prop="number" label="文档编号" width="100" />
+            <el-table-column prop="fileId" label="文档编号" width="300" />
             <el-table-column prop="name" label="文档名称" width="260" />
-            <el-table-column prop="scene" label="所属场景" width="300" />
-            <el-table-column prop="type" label="文件类型" width="150" />
-            <el-table-column prop="date" label="创建时间" width="200" />
-            <el-table-column label="操作">
+            <el-table-column prop="conditions" label="所属场景" width="100" />
+            <el-table-column prop="remark" label="文件类型" width="150" />
+            <el-table-column prop="createTime" label="创建时间" width="200" >
+            <template #default="scope">
+                    {{ proxy.$commonJs.formattedTime(scope.row.createTime) }}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150">
                 <template #default="scope">
-                    <el-link type="primary" @click="downloadDoc" :underline="false">下载</el-link>
-                    <el-link type="primary" @click="editDoc" :underline="false">编辑</el-link>
-                    <el-link type="danger" @click="deleteDoc" :underline="false">删除</el-link>
+                    <el-link type="primary" @click="editDoc(scope.row)" :underline="false">编辑</el-link>
+                    <el-link type="danger" @click="deleteDoc(scope.row.id)" :underline="false">删除</el-link>
                 </template>
             </el-table-column>
         </el-table>
         <!-- 分页 -->
-        <el-pagination style="margin-top:20px" :current-page="searchForm.current" :page-size="searchForm.size"
+        <el-pagination style="margin-top:20px" :current-page="pageNo" :page-size="pageSize"
             :page-sizes="[10, 20, 30, 40]" layout="->,total, sizes, prev, pager, next, jumper" :total="total"
             @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </el-card>
     <!-- 新增编辑文档 -->
-    <el-dialog v-model="dialogFormVisible" title="新增文档" width="500">
+    <el-dialog v-model="dialogFormVisible" :title="docTitle" width="500" @close="cancleDoc">
         <el-form ref="docRuleFormRef" :model="docRuleForm" :rules="docRules" label-width="auto">
             <el-form-item label="文档名称" :label-width="formLabelWidth" prop="name" v-if="isBulk!==true">
                 <el-input v-model="docRuleForm.name" placeholder="请输入文档名称" />
-            </el-form-item>
-            <el-form-item label="文档编号" :label-width="formLabelWidth" prop="num" v-if="isBulk!==true">
-                <el-input v-model="docRuleForm.num" placeholder="请输入文档编号" />
             </el-form-item>
             <el-form-item label="所属场景" :label-width="formLabelWidth" prop="scene">
                 <el-select
@@ -108,25 +108,16 @@
                     placeholder="请选择所属场景"
                     >
                     <el-option
-                        v-for="item in uploadSceneList"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value"
+                        v-for="item in sceneList"
+                        :key="item.conditionsId"
+                        :label="item.conditionsName"
+                        :value="item.conditionsId"
                     />
                     </el-select>
             </el-form-item>
             <el-form-item label="文档上传" :label-width="formLabelWidth" required>
                 <!-- 上传 -->
-                <el-upload :limit="1" v-model:file-list="fileList" class="upload-demo"
-                    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" :on-change="handleChange">
-                    <el-button type="primary">点击上传</el-button>
-
-                    <template #tip>
-                        <div class="el-upload__tip">
-                            jpg/png files with a size less than 500kb
-                        </div>
-                    </template>
-                </el-upload>
+                <UploadFile :fileUrlList="fileUrls"   @updateFileValue="getfilesData" :isUpload="canUpload"></UploadFile>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -140,184 +131,121 @@
     </el-dialog>
 </template>
 
-<script lang="ts" setup>
-import userApi from "../../api/user";
-import BreadcrumbDing from '../../components/BreadcrumbDing.vue';
-import { onMounted, reactive, ref } from "vue";
+<script  setup>
+import documentApi from "../../api/document";
+import sceneApi from "../../api/scene";
+import { onMounted, reactive, ref,getCurrentInstance,toRef } from "vue";
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search, RefreshLeft, Plus, Delete} from '@element-plus/icons-vue';
-import type { UploadProps, UploadUserFile, FormInstance, FormRules} from 'element-plus';
-import { useRouter } from 'vue-router'
-const router = useRouter();
-// Dom 挂载之后
-onMounted(() => {
-    // getUserList();
-})
+
+
+import BreadcrumbDing from '../../components/BreadcrumbDing.vue';
+import UploadFile from "../../components/UploadFile.vue";
+
+const { proxy } = getCurrentInstance();
+
+let docTitle = ref('上传文档')
+let fileParams = ref([]) // 文档传参
+let fileUrls = ref([])
+let pageNo = ref(1)
+let pageSize = ref(10);
+let total = ref(10);
+let loading = ref(true)
+const isBulk = ref(false);
+const canUpload = ref(true)
+const multipleSelection = ref([])
 // 所属场景
-const sceneList = ref([
-  {
-    name: '全部',
-    value: '全部',
-  },{
-    name: '物流',
-    value: '物流',
-  },{
-    name: '营销',
-    value: '营销',
-  },{
-    name: '采购',
-    value: '采购',
-  },{
-    name: '综合行政',
-    value: '综合行政',
-  }])
+const sceneList = ref([])
 // 文件类型
 const docTypeList = ref([
-  {
-    name: '全部',
-    value: '全部',
-  },{
-    name: 'pdf',
-    value: 'pdf',
-  },{
-    name: 'word',
-    value: 'word',
-  },{
-    name: 'pptx',
-    value: 'pptx',
-  },{
-    name: 'excel',
-    value: 'excel',
-  }])
+  ])
 
 // 用户数据
-let tableData = ref([
-    {
-        number: 1,
-        name: '每日推荐视频集',
-        scene:'未分配',
-        type: 'pdf',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-    {
-        number: 2,
-        name: '每日推荐视频集',
-        scene:'物流、营销',
-        type: 'world',
-        date: '2021-05-03',
-    },
-]);
-let total = ref(0);
+let tableData = ref([]);
+
 // 搜索条件
 const searchForm = reactive({
-    current: 1,
-    size: 10,
     num:'',
     name:'',
     scene:'',
     docType:'',
-    createTime:''
+    createTime: []
 })
-// 获取用户列表
-const getUserList = async () => {
-    const res = await userApi.getUserList(searchForm);
-    console.log(res);
-    tableData.value = res.data.data.records;
-    total.value = res.data.data.total;
+const search = ()=> {
+    pageNo.value = 1
+    getDocumentList()
 }
 
+const resetSearch = ()=> {
+    pageNo.value = 1
+    searchForm.num = ''
+    searchForm.name = ''
+    searchForm.scene = ''
+    searchForm.docType = ''
+    searchForm.createTime = []
+    getDocumentList()
+}
+// 获取文档列表     文档编号 fileId  文档名称 name  文件类型 remark 创建时间 createTime【startTime,endTime】
+const getDocumentList = async () => {
+    let startTime = proxy.$commonJs.formateTimestamp(searchForm.createTime[0]);
+    let endTime = proxy.$commonJs.formateTimestamp(searchForm.createTime[1]);
+    let param = {
+    pageNo: pageNo.value,
+    pageSize: pageSize.value,
+    conditionsId: searchForm.scene,
+    name: searchForm.name,
+    fileId : searchForm.num,
+    remark: searchForm.docType,
+    createTime: [startTime,endTime]
+  }
+  const res = await documentApi.getDocumentList(param);
+  if (res.data) {
+    loading.value = false;
+    total.value = res.data.total;
+    tableData.value = res.data.list;
+  }
+}
+// 获取场景列表
+const getSceneList = async () => {
+  let param = {
+    conditionsName: ''
+  }
+  const res = await sceneApi.getSceneList(param);
+  if (res.data) {
+    loading.value = false;
+    sceneList.value = res.data.sort((a, b) => a.conditionsSort - b.conditionsSort);
+  }
+};
+// 获取文件类型列表
+const getTypeList = async () => {
+  const res = await documentApi.getDocumentTypeList();
+  if (res.data) {
+    docTypeList.value = res.data;
+  }
+};
+const getfilesData = (item) => {
+    if(item.value.length > 0){
+        item.value.map(v => {
+            fileParams.value.push({
+                name: v.name,
+                fileUrl: v.url,
+                remark: v.type
+            })
+        })
+    }
+}
 // 弹窗
 // 上传所属场景
-const uploadSceneList = [
-  {
-    name: '物流',
-    value: '物流',
-  },{
-    name: '营销',
-    value: '营销',
-  },{
-    name: '采购',
-    value: '采购',
-  },{
-    name: '综合行政',
-    value: '综合行政',
-  }]
-
 const formLabelWidth = '140px'
 const dialogFormVisible = ref(false);
-const fileList = ref<UploadUserFile[]>([
-  {
-    name: 'food.jpeg',
-    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
-  },
-  {
-    name: 'food2.jpeg',
-    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
-  },
-])
 
-const handleChange: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
-  fileList.value = fileList.value.slice(-3)
-}
-
-// 上传校验规则
-interface DocRuleForm {
-  name: string
-  num: string
-  scene: Array
-}
-
-const docRuleFormRef = ref<FormInstance>()
-
-const docRuleForm = reactive<DocRuleForm>({
+const docRuleFormRef = ref()
+const docRuleForm = reactive({
   name: '',
-  num: '',
   scene: []
 })
 
-const docRules = reactive<FormRules<DocRuleForm>>({
+const docRules = reactive({
     name: [
         { required: true, message: '请输入文档名称', trigger: 'blur' },
         { min: 3, max: 10, message: '长度 3 到 10', trigger: 'blur' },
@@ -333,48 +261,118 @@ const docRules = reactive<FormRules<DocRuleForm>>({
     }]
 })
 
+// 重置文件上传表单
+const resetFile = () => {
+    // childComp.value.clear();
 
+    docRuleFormRef.value.resetFields();
+    fileUrls.value = [];
+    proxy.$commonJs.clearObj(docRuleForm)
+}
 // 上传
-// 是否批量
-const isBulk = ref(false);
+
 const uploadDoc = () => {
+    docTitle.value = '上传文档';
     isBulk.value = false
+    canUpload.value = true;
     dialogFormVisible.value = true
 }
 // 批量上传
 const uploadBulkDoc = () =>{
+    docTitle.value = '批量上传文档';
     isBulk.value = true
+    canUpload.value = true;
+    dialogFormVisible.value = true
+}
+// 取消
+const cancleDoc = () => {
+    resetFile()
+    dialogFormVisible.value = false
+}
+// 编辑
+const editDoc = (item) => {
+    docTitle.value = '编辑文档';
+    docRuleForm.name = item.name;
+    canUpload.value = false;
+    docRuleForm.scene = item.conditionsList;
+    fileUrls.value.push({ name: item.name, url: item.fileUrl})
+    isBulk.value = false
     dialogFormVisible.value = true
 }
 // 保存
-const saveDoc = async (formEl: FormInstance | undefined) => {
+const saveDoc = async (formEl) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
-      console.log('submit!')
+        if(docTitle.value !== '编辑文档'){
+        addDoc()
+        } else{
+        editDocs()
+        }
+        dialogFormVisible.value = false;
     } else {
       console.log('error submit!', fields)
     }
   })
 }
-// 取消
-const cancleDoc = () => {
-    docRuleFormRef.value.resetFields()
-    dialogFormVisible.value = false
-}
-// 编辑
-const editDoc = () => {
-    isBulk.value = false
-    dialogFormVisible.value = true
-}
+// 文档上传api
+const addDoc = async () => {
+    // let conditionsList = [];
+    let params = {}
+    // conditionsList.push(docRuleForm.scene)
+    let fileVal = JSON.parse(JSON.stringify((fileParams.value)))
+    if(docTitle.value === '上传文档'){
+        params = {
+        conditionsList: docRuleForm.scene,
+        name: fileVal[0].name,
+        fileUrl: fileVal[0].fileUrl,
+        remark: fileVal[0].type
+       }
+    } else{
+        params = {
+        conditionsList: docRuleForm.scene,
+        fileList: fileParams.value,
+       }
+    }
+
+    const res =  docTitle.value === '上传文档' ? await documentApi.addDocument(params) : await documentApi.addMulDocument(params);
+        if (res.data) {
+            ElMessage.success("上传成功")
+            getDocumentList();
+        } else {
+            ElMessage.error("上传失败")
+        }
+};
+// 文档编辑api
+const editDocs = async () => {
+    // let conditionsList = [];
+    // conditionsList.push(docRuleForm.scene)
+    const param = {
+        conditionsList: docRuleForm.scene,
+        name: docRuleForm.name
+    }
+    const res = await documentApi.editDocument(param);
+        if (res.data) {
+            ElMessage.success("编辑成功")
+            getDocumentList();
+        } else {
+            ElMessage.error("编辑失败")
+        }
+};
+
 
 const handleSelectionChange = (val) => {
     multipleSelection.value = val
 }
 const handleSizeChange = (val) => {
+    pageSize.value = val;
+    loading.value = true;
+    getDocumentList();
 }
 const handleCurrentChange = (val) => {
-
+    pageNo.value = val;
+    loading.value = true;
+    getDocumentList();
 }
 
 
@@ -390,10 +388,10 @@ const deleteDoc = (id) => {
             type: 'warning',
         }
     ).then(async () => {
-        const res = await userApi.delUser({ id: id });
-        if (res.data.success) {
+        const res = await documentApi.deleteDocument({ id: id });
+        if (res.data) {
             ElMessage.success("删除成功")
-            getUserList();
+            getDocumentList();
         } else {
             ElMessage.error("删除失败")
         }
@@ -404,7 +402,42 @@ const deleteDoc = (id) => {
         })
     })
 }
-
+// 批量删除文档
+const multiDeleteDoc = () => {
+    if (multipleSelection.value.length === 0) {
+        ElMessage.warning('请选择要删除的文档')
+        return
+    }
+    let id = multipleSelection.value.map((item) => item.id).join(',');
+    ElMessageBox.confirm(
+        '您即将删除该场景，所属场景下的文档将同步被取消分类，进入"未分配"状态，请确认后操作。',
+        '删除文档',
+        {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+        }
+    ).then(async () => {
+        const res = await documentApi.deleteMulDocument({ ids: id });
+        if (res.data) {
+            ElMessage.success("删除成功")
+            getDocumentList();
+        } else {
+            ElMessage.error("删除失败")
+        }
+    }).catch(() => {
+        ElMessage({
+            type: 'info',
+            message: '取消删除',
+        })
+    })
+}
+// Dom 挂载之后
+onMounted(() => {
+    getSceneList();
+    getTypeList();
+    getDocumentList();
+})
 </script>
 
 <style lang="scss" scoped>

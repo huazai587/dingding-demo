@@ -16,7 +16,7 @@ const routes = [
     path: "/home",
     name: "主页",
     meta: {
-      title:'主页'
+      title: "主页",
     },
     component: () => import("../view/Home.vue"),
     redirect: "/scene",
@@ -25,27 +25,27 @@ const routes = [
         path: "/scene",
         name: "场景管理",
         meta: {
-          title:'场景管理',
-          showFather: true
+          title: "场景管理",
+          showFather: true,
         },
-        component: () => import("../view/scene/Index.vue"),
+        component: () => import("../view/scene/SceneManager.vue"),
         children: [
           {
             path: "/scene/document-list/:id",
             name: "文档列表",
             meta: {
-                title:'文档列表',
-                showFather: false
+              title: "文档列表",
+              showFather: false,
             },
-            component: () => import("../view/scene/Doc.vue")
-          }
-        ]
+            component: () => import("../view/scene/DocumentList.vue"),
+          },
+        ],
       },
       {
         path: "/document-manager",
         name: "文档管理",
         meta: {
-          title:'文档管理'
+          title: "文档管理",
         },
         component: () => import("../view/document/Index.vue"),
       },
@@ -67,13 +67,23 @@ router.beforeEach((to, from, next) => {
     return next();
   }
   // 获取token
-  // const token= sessionStorage.getItem('token')
-  // if (!token) {
-  //   return next('/login')
-  // } else {
-  //   next()
-  // }
-  return next();
+  //页面是否登录，本地存储中是否有token的数据
+  let K = localStorage.getItem("token");
+  try {
+    K = JSON.parse(K);
+  } catch (err) {}
+  if (K) {
+    let date = new Date().getTime();
+    // 如果大于就是过期了
+    if (date - K.startTime > K.endTime) {
+      localStorage.removeItem("token");
+      return next("/login");
+    } else {
+      return next();
+    }
+  }else{
+    return next("/login");
+  }
 });
 
 // 导出路由
